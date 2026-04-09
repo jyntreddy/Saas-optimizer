@@ -1,0 +1,5 @@
+# Logs Directory
+
+Application logs will be stored here.
+
+This directory is ignored by git (see .gitignore).

@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: saas-optimizer-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: saas_optimizer
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saas-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: saas-optimizer-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saas-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../infra/docker/backend/Dockerfile
+    container_name: saas-optimizer-backend
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/saas_optimizer
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      SECRET_KEY: dev-secret-key-change-in-production
+      DEBUG: "True"
+      ENVIRONMENT: development
+      BACKEND_CORS_ORIGINS: '["http://localhost:8501", "http://127.0.0.1:8501", "http://frontend:8501"]'
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - saas-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../infra/docker/frontend/Dockerfile
+    container_name: saas-optimizer-frontend
+    environment:
+      BACKEND_URL: http://backend:8000
+      API_V1_PREFIX: /api/v1
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+    command: streamlit run Home.py --server.port=8501 --server.address=0.0.0.0
+    networks:
+      - saas-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  saas-network:
+    driver: bridge

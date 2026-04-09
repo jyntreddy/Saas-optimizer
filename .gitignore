@@ -1,0 +1,45 @@
+.git/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+.DS_Store
+*.log
+*.db
+*.sqlite
+
+# Backend
+backend/.env
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/.mypy_cache/
+backend/alembic/versions/*.py
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+frontend/.env*.local
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Infrastructure
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/.terraform.lock.hcl
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

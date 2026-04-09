@@ -1,0 +1,16 @@
+{
+  "name": "SaaS Optimizer",
+  "short_name": "SaaS Opt",
+  "description": "Manage and optimize your SaaS subscriptions",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
