@@ -31,11 +31,10 @@ A comprehensive platform for managing and optimizing SaaS subscriptions with AI-
 
 ### Infrastructure
 - **Containerization**: Docker & Docker Compose
-- **Orchestration**: AWS ECS (optional)
 - **IaC**: Terraform
 - **Database**: AWS RDS PostgreSQL
 - **Cache**: AWS ElastiCache Redis
-- **Load Balancer**: nginx / AWS ALB
+- **Load Balancer**: nginx 
 
 ## 📁 Project Structure
 
