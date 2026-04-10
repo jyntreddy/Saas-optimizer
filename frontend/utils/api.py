@@ -241,3 +241,33 @@ def create_subscription_from_sms(token: str, transaction_id: int) -> Optional[Di
     except Exception as e:
         print(f"Create subscription from SMS error: {e}")
         return None
+
+
+def make_request(method: str, endpoint: str, **kwargs) -> Optional[Any]:
+    """Generic API request handler with authentication"""
+    import streamlit as st
+    
+    # Get token from session
+    token = st.session_state.get('access_token')
+    
+    # Add authorization header
+    headers = kwargs.get('headers', {})
+    if token:
+        headers['Authorization'] = f"Bearer {token}"
+    kwargs['headers'] = headers
+    
+    # Make request
+    try:
+        url = f"{BASE_URL}{endpoint}"
+        response = requests.request(method, url, **kwargs)
+        
+        if response.status_code in [200, 201]:
+            return response.json()
+        elif response.status_code == 204:
+            return True
+        else:
+            st.error(f"Request failed: {response.status_code}")
+            return None
+    except Exception as e:
+        st.error(f"API error: {e}")
+        return None
