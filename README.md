@@ -278,10 +278,6 @@ NEXT_PUBLIC_APP_NAME=SaaS Optimizer
 
 This project is licensed under the MIT License.
 
-## 👥 Authors
-
-- Your Name
-
 ## 🙏 Acknowledgments
 
 - FastAPI for the excellent backend framework
