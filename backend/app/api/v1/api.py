@@ -12,7 +12,8 @@ from .endpoints import (
     email_forward,
     team,
     negotiation,
-    gamification
+    gamification,
+    usage
 )
 
 api_router = APIRouter()
@@ -30,3 +31,4 @@ api_router.include_router(email_forward.router, prefix="/email-forward", tags=["
 api_router.include_router(team.router, prefix="/team", tags=["team-tracking"])
 api_router.include_router(negotiation.router, prefix="/negotiate", tags=["negotiation"])
 api_router.include_router(gamification.router, prefix="/gamification", tags=["gamification"])
+api_router.include_router(usage.router, prefix="/usage", tags=["usage-tracking"])

@@ -2,13 +2,43 @@
 
 ## 🖥️ Overview
 
-The SaaS Optimizer Desktop App provides native device access with user permissions for:
+The SaaS Optimizer Desktop App provides comprehensive device monitoring with user permissions for:
 - 📧 **Email Reading** - Scan local mail clients (Mail.app, Outlook, Thunderbird)
--  **Document Scanning** - OCR receipts using camera/screen capture
+- 📱 **App Usage Tracking** - Monitor which SaaS applications you actually use
+- 🌐 **Browser Activity** - Track web-based SaaS usage from browser history
+- 📊 **Usage Analytics** - Comprehensive dashboard with cost optimization insights
+- 📸 **Document Scanning** - OCR receipts using camera/screen capture
 - 📅 **Calendar Sync** - Track renewal dates from system calendars
 - 🔔 **Notifications** - Desktop alerts for renewals and recommendations
+- 💡 **Smart Recommendations** - AI-powered cost savings based on actual usage
 
 ## ✨ Features
+
+### App Usage Monitor
+- **Real-time Tracking**: Monitors which SaaS applications are running
+- **50+ Applications**: Tracks Slack, Zoom, Notion, Figma, VS Code, and more
+- **Duration Tracking**: Records how long each app is used
+- **Category Analysis**: Groups by Communication, Productivity, Development, Design, etc.
+- **Privacy-first**: All monitoring happens locally on your device
+- **Usage Insights**: Identifies unused or underused subscriptions
+
+### Browser Activity Monitor
+- **Multi-browser Support**: Chrome, Firefox, Edge, Safari
+- **Web SaaS Detection**: Tracks usage of 100+ web-based services
+- **Visit Analysis**: Counts visits and active days for each service
+- **Smart Correlation**: Matches browser activity with subscription costs
+- **Privacy**: One-time history scan, data stays local until you sync
+
+### Usage Analytics Dashboard
+Powered by comprehensive device monitoring, the dashboard provides:
+- **📊 Dashboard**: Real-time overview of subscriptions, spending, and SaaS Score
+- **💰 Cost Analysis**: Monthly/annual spending breakdown by category and vendor
+- **📈 Usage Trends**: See which tools you actually use vs what you pay for
+- **💡 Recommendations**: AI-generated cost-saving suggestions based on real usage
+- **🔄 Alternatives**: Find cheaper alternatives to your current subscriptions
+- **🏆 SaaS Score**: 0-100 score measuring subscription optimization
+- **⚠️ Unused Alerts**: Identify subscriptions you haven't used in 30+ days
+- **👥 Team Insights**: Understand team usage patterns (multi-user)
 
 ### Email Reader
 - **macOS**: Accesses Mail.app database
@@ -99,14 +129,70 @@ Access via **Settings** menu:
 {
   "backendUrl": "http://localhost:8000",
   "frontendUrl": "http://localhost:8501",
-  "autoSyncEmails": true,        // Scan emails every 30 min
-  "enableReminders": true,        // Calendar notifications
-  "ocrLanguage": "eng",           // Tesseract language
-  "emailPaths": []                // Custom email locations
+  "autoSyncEmails": true,           // Scan emails every 30 min
+  "enableAppMonitoring": true,      // Track application usage
+  "enableBrowserMonitoring": true,  // Scan browser history
+  "autoSyncUsage": true,            // Upload usage data hourly
+  "enableReminders": true,          // Calendar notifications
+  "ocrLanguage": "eng",             // Tesseract language
+  "emailPaths": []                  // Custom email locations
 }
 ```
 
 ## 📱 Usage
+
+### Get Dashboard Analytics
+
+```javascript
+// Get comprehensive dashboard with all metrics
+const dashboard = await window.electronAPI.getDashboardAnalytics();
+
+console.log('SaaS Score:', dashboard.data.overview.saasScore);
+console.log('Monthly Spend:', dashboard.data.overview.monthlySpend);
+console.log('Potential Savings:', dashboard.data.overview.potentialSavings);
+console.log('Unused Subscriptions:', dashboard.data.overview.unusedSubscriptions);
+```
+
+### Get App Usage
+
+```javascript
+// Get application usage tracking data
+const appUsage = await window.electronAPI.getAppUsage();
+
+console.log('Currently Running Apps:', appUsage.data.currentlyRunning);
+console.log('Usage by Category:', appUsage.data.byCategory);
+console.log('Usage by Vendor:', appUsage.data.byVendor);
+```
+
+### Get Browser Usage
+
+```javascript
+// Get web-based SaaS usage from browser history
+const browserUsage = await window.electronAPI.getBrowserUsage(168); // Last 7 days
+
+console.log('Web Services Used:', browserUsage.data.summary);
+console.log('By Category:', browserUsage.data.byCategory);
+```
+
+### Get Alternatives
+
+```javascript
+// Get cheaper alternatives for subscriptions
+const alternatives = await window.electronAPI.getAlternatives([
+  { vendor: 'Slack', cost: 8 },
+  { vendor: 'Zoom', cost: 15 }
+]);
+
+console.log('Alternatives:', alternatives.data);
+```
+
+### Toggle App Monitoring
+
+```javascript
+// Enable or disable app monitoring
+await window.electronAPI.toggleAppMonitoring(true);  // Enable
+await window.electronAPI.toggleAppMonitoring(false); // Disable
+```
 
 ### Scan Emails
 
@@ -158,14 +244,19 @@ await window.electronAPI.sendNotification({
 
 The desktop app runs background services:
 
+- **App Usage Monitor**: Every 5 seconds (tracks running apps)
+- **Browser History Scan**: On-demand and during sync
 - **Email Scanner**: Every 30 minutes
 - **Calendar Sync**: Every hour
+- **Usage Data Sync**: Every 30 minutes (uploads to backend)
 - **Renewal Alerts**: 3 days before due date
 
 ### Disable Auto-Sync
 
 ```javascript
 await window.electronAPI.setSetting('autoSyncEmails', false);
+await window.electronAPI.setSetting('autoSyncUsage', false);
+await window.electronAPI.toggleAppMonitoring(false); // Stop app tracking
 ```
 
 ## 🛠️ Development

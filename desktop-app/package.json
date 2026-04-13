@@ -30,7 +30,8 @@
     "node-machine-id": "^1.1.12",
     "mailparser": "^3.6.5",
     "ical": "^0.8.0",
-    "tesseract.js": "^5.0.4"
+    "tesseract.js": "^5.0.4",
+    "sqlite3": "^5.1.6"
   },
   "build": {
     "appId": "com.saasoptimizer.desktop",

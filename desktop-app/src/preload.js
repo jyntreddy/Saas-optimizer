@@ -22,13 +22,23 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Device info
   getDeviceId: () => ipcRenderer.invoke('get-device-id'),
   
+  // Application usage monitoring
+  getAppUsage: () => ipcRenderer.invoke('get-app-usage'),
+  getBrowserUsage: (hoursBack) => ipcRenderer.invoke('get-browser-usage', hoursBack),
+  getDashboardAnalytics: () => ipcRenderer.invoke('get-dashboard-analytics'),
+  getAlternatives: (subscriptions) => ipcRenderer.invoke('get-alternatives', subscriptions),
+  toggleAppMonitoring: (enabled) => ipcRenderer.invoke('toggle-app-monitoring', enabled),
+  syncUsageData: () => ipcRenderer.invoke('sync-usage-data'),
+  
   // Event listeners
   onEmailSync: (callback) => ipcRenderer.on('trigger-email-sync', callback),
   onCheckReminders: (callback) => ipcRenderer.on('check-reminders', callback),
+  onUsageSync: (callback) => ipcRenderer.on('trigger-usage-sync', callback),
   
   // Remove listeners
   removeEmailSyncListener: () => ipcRenderer.removeAllListeners('trigger-email-sync'),
-  removeRemindersListener: () => ipcRenderer.removeAllListeners('check-reminders')
+  removeRemindersListener: () => ipcRenderer.removeAllListeners('check-reminders'),
+  removeUsageSyncListener: () => ipcRenderer.removeAllListeners('trigger-usage-sync')
 });
 
 // Platform information

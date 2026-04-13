@@ -10,7 +10,20 @@ A comprehensive platform for managing and optimizing SaaS subscriptions with AI-
 - **AI Recommendations**: Get intelligent suggestions for cost optimization
 - **Automated Alerts**: Receive notifications for upcoming renewals
 - **Duplicate Detection**: Identify overlapping services
-- **Usage Analytics**: Monitor subscription utilization
+- **Usage Analytics**: Monitor subscription utilization with real device data
+- **SaaS Score**: Optimization score based on actual vs spending
+- **Alternative Suggestions**: Find cheaper alternatives to current subscriptions
+- **Team Usage Insights**: Track which team members use which tools
+
+### 🖥️ Desktop Device Monitoring
+**Complete device access with user permission** to power all features:
+- **📱 App Usage Tracking**: Monitors 50+ desktop SaaS applications (Slack, Zoom, Notion, Figma, etc.)
+- **🌐 Browser Activity**: Tracks 100+ web-based SaaS services across Chrome, Firefox, Edge, Safari
+- **⏱️ Duration Tracking**: Records exact time spent in each application
+- **📊 Usage Analytics**: Correlates actual usage with subscription costs
+- **💡 Smart Insights**: Identifies unused subscriptions and underutilized tools
+- **🎯 Cost Per Usage**: Calculate hourly cost for each service
+- **🔄 Automated Sync**: Hourly background sync of usage data to dashboard
 
 ### 📧 Email Automation
 Multiple ways to automatically capture subscription receipts:
