@@ -5,7 +5,6 @@ from .endpoints import (
     subscriptions,
     analytics,
     recommendations,
-    sms,
     summary,
     alternatives,
     emails,
@@ -23,7 +22,6 @@ api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["subscriptions"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 api_router.include_router(recommendations.router, prefix="/recommendations", tags=["recommendations"])
-api_router.include_router(sms.router, prefix="/sms", tags=["sms"])
 api_router.include_router(summary.router, prefix="/subscriptions", tags=["summary"])
 api_router.include_router(alternatives.router, prefix="/subscriptions", tags=["alternatives"])
 api_router.include_router(emails.router, prefix="/emails", tags=["email-intelligence"])

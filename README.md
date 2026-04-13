@@ -12,9 +12,9 @@ A comprehensive platform for managing and optimizing SaaS subscriptions with AI-
 - **Duplicate Detection**: Identify overlapping services
 - **Usage Analytics**: Monitor subscription utilization
 
-### 📧 Email & SMS Automation
+### 📧 Email Automation
 Multiple ways to automatically capture subscription receipts:
-- **Desktop App**: Native device integration with full email/SMS access (macOS, Windows, Linux)
+- **Desktop App**: Native device integration with full email access (macOS, Windows, Linux)
 - **Gmail OAuth Integration**: Bulk scan your Gmail for historical receipts  
 - **Email Forwarding**: Forward receipts to dedicated email for auto-processing
 - **Browser Extension**: One-click scanning directly from Gmail inbox

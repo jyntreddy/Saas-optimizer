@@ -6,9 +6,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Email operations
   scanEmails: (options) => ipcRenderer.invoke('scan-emails', options),
   
-  // SMS operations
-  scanSMS: (options) => ipcRenderer.invoke('scan-sms', options),
-  
   // Camera/document scanning
   scanDocument: (options) => ipcRenderer.invoke('scan-document', options),
   
@@ -27,12 +24,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // Event listeners
   onEmailSync: (callback) => ipcRenderer.on('trigger-email-sync', callback),
-  onSMSSync: (callback) => ipcRenderer.on('trigger-sms-sync', callback),
   onCheckReminders: (callback) => ipcRenderer.on('check-reminders', callback),
   
   // Remove listeners
   removeEmailSyncListener: () => ipcRenderer.removeAllListeners('trigger-email-sync'),
-  removeSMSSyncListener: () => ipcRenderer.removeAllListeners('trigger-sms-sync'),
   removeRemindersListener: () => ipcRenderer.removeAllListeners('check-reminders')
 });
 

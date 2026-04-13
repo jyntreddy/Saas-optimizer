@@ -6,7 +6,6 @@ const { machineIdSync } = require('node-machine-id');
 
 // Services
 const EmailReader = require('./services/emailReader');
-const SMSReader = require('./services/smsReader');
 const CameraScanner = require('./services/cameraScanner');
 const CalendarSync = require('./services/calendarSync');
 const APIClient = require('./services/apiClient');
@@ -102,10 +101,6 @@ function initializeServices() {
   const emailReader = new EmailReader(apiClient);
   emailReader.startMonitoring();
 
-  // SMS reader service (primarily Android via ADB, iOS via Messages.app)
-  const smsReader = new SMSReader(apiClient);
-  smsReader.startMonitoring();
-
   // Camera scanner service
   const cameraScanner = new CameraScanner(apiClient);
 
@@ -128,20 +123,6 @@ ipcMain.handle('scan-emails', async (event, options) => {
     return { success: true, data: results };
   } catch (error) {
     console.error('Email scan error:', error);
-    return { success: false, error: error.message };
-  }
-});
-
-// SMS scanning
-ipcMain.handle('scan-sms', async (event, options) => {
-  try {
-    const smsReader = new SMSReader(
-      new APIClient(store.get('backendUrl'), store.get('authToken'))
-    );
-    const results = await smsReader.scanForTransactions(options);
-    return { success: true, data: results };
-  } catch (error) {
-    console.error('SMS scan error:', error);
     return { success: false, error: error.message };
   }
 });
@@ -225,13 +206,8 @@ setInterval(() => {
     mainWindow?.webContents.send('trigger-email-sync');
   }
 
-  // Auto-sync SMS every 15 minutes
-  if (store.get('autoSyncSMS', true)) {
-    mainWindow?.webContents.send('trigger-sms-sync');
-  }
-
   // Check for renewal reminders
   if (store.get('enableReminders', true)) {
     mainWindow?.webContents.send('check-reminders');
   }
-}, 15 * 60 * 1000); // 15 minutes
+}, 30 * 60 * 1000); // 30 minutes

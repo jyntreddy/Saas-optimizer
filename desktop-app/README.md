@@ -4,8 +4,7 @@
 
 The SaaS Optimizer Desktop App provides native device access with user permissions for:
 - 📧 **Email Reading** - Scan local mail clients (Mail.app, Outlook, Thunderbird)
-- 📱 **SMS Access** - Read transaction SMS from Messages.app or Android devices
-- 📸 **Document Scanning** - OCR receipts using camera/screen capture
+-  **Document Scanning** - OCR receipts using camera/screen capture
 - 📅 **Calendar Sync** - Track renewal dates from system calendars
 - 🔔 **Notifications** - Desktop alerts for renewals and recommendations
 
@@ -17,12 +16,6 @@ The SaaS Optimizer Desktop App provides native device access with user permissio
 - **Linux**: Parses Thunderbird profiles
 - **Auto-detection**: Finds receipts from 20+ SaaS vendors
 - **Privacy**: All processing happens locally
-
-### SMS Reader
-- **macOS**: Reads Messages.app SQLite database
-- **Windows**: Syncs via "Your Phone" app
-- **Linux**: Uses Android Debug Bridge (ADB)
-- **Smart Filtering**: Detects transaction keywords and currency patterns
 
 ### Camera Scanner
 - **OCR**: Uses Tesseract.js for text extraction
@@ -43,9 +36,6 @@ The SaaS Optimizer Desktop App provides native device access with user permissio
 ```bash
 # Node.js 18+ required
 node --version
-
-# Optional: Android SDK for SMS via ADB
-adb version
 ```
 
 ### Install Desktop App
@@ -82,18 +72,11 @@ The app will request permissions on first run:
 3. **Calendar**: Automatically requested for event access
 
 ### Windows
-1. **Your Phone**: Install from Microsoft Store for SMS sync
-2. **Outlook**: Runs with standard user permissions
-3. **Camera**: Windows will prompt for permission
+1. **Outlook**: Runs with standard user permissions
+2. **Camera**: Windows will prompt for permission
 
 ### Linux
-1. **ADB Setup**: For Android SMS access
-   ```bash
-   sudo apt install android-tools-adb
-   adb devices  # Authorize your device
-   ```
-
-2. **Calendar**: Access Evolution or Thunderbird profiles
+1. **Calendar**: Access Evolution or Thunderbird profiles
    ```bash
    chmod +r ~/.local/share/evolution/calendar/*.ics
    ```
@@ -117,11 +100,9 @@ Access via **Settings** menu:
   "backendUrl": "http://localhost:8000",
   "frontendUrl": "http://localhost:8501",
   "autoSyncEmails": true,        // Scan emails every 30 min
-  "autoSyncSMS": true,            // Scan SMS every 15 min
   "enableReminders": true,        // Calendar notifications
   "ocrLanguage": "eng",           // Tesseract language
-  "emailPaths": [],               // Custom email locations
-  "smsDatabasePath": null         // Custom SMS database path
+  "emailPaths": []                // Custom email locations
 }
 ```
 
@@ -137,15 +118,6 @@ const result = await window.electronAPI.scanEmails({
 });
 
 console.log(`Found ${result.data.length} receipts`);
-```
-
-### Scan SMS
-
-```javascript
-const result = await window.electronAPI.scanSMS({
-  days: 90,
-  keywords: ['debited', 'subscription']
-});
 ```
 
 ### Scan Document
@@ -187,7 +159,6 @@ await window.electronAPI.sendNotification({
 The desktop app runs background services:
 
 - **Email Scanner**: Every 30 minutes
-- **SMS Scanner**: Every 15 minutes
 - **Calendar Sync**: Every hour
 - **Renewal Alerts**: 3 days before due date
 
@@ -195,7 +166,6 @@ The desktop app runs background services:
 
 ```javascript
 await window.electronAPI.setSetting('autoSyncEmails', false);
-await window.electronAPI.setSetting('autoSyncSMS', false);
 ```
 
 ## 🛠️ Development
@@ -211,7 +181,6 @@ desktop-app/
 │   └── services/
 │       ├── apiClient.js      # Backend API communication
 │       ├── emailReader.js    # Email scanning service
-│       ├── smsReader.js      # SMS parsing service
 │       ├── cameraScanner.js  # OCR document scanner
 │       └── calendarSync.js   # Calendar integration
 └── assets/
@@ -251,7 +220,7 @@ const result = await window.electronAPI.scanEmails({ days: 30 });
 - **Local First**: All scanning happens on your device
 - **Encrypted Storage**: Uses electron-store with encryption
 - **Secure Auth**: JWT tokens stored in OS keychain
-- **No Cloud Sync**: Email/SMS data never leaves your device (except what you upload)
+- **No Cloud Sync**: Email data never leaves your device (except what you upload)
 
 ### Permissions
 - **Minimal Access**: Only requests necessary permissions
@@ -288,11 +257,11 @@ adb devices
 # Click "Allow" on your phone
 ```
 
-### Email/SMS not detected
+### Email not detected
 ```javascript
 // Check service status
 const settings = await window.electronAPI.getSettings();
-console.log('Auto-sync enabled:', settings.autoSyncEmails, settings.autoSyncSMS);
+console.log('Auto-sync enabled:', settings.autoSyncEmails);
 
 // Manual scan
 await window.electronAPI.scanEmails({ days: 365 });
@@ -300,18 +269,18 @@ await window.electronAPI.scanEmails({ days: 365 });
 
 ## 📊 Supported Platforms
 
-| Platform | Email | SMS | Camera | Calendar |
-|----------|-------|-----|--------|----------|
-| macOS 10.15+ | ✅ Mail.app | ✅ Messages.app | ✅ Screen Capture | ✅ Calendar.app |
-| Windows 10+ | ✅ Outlook | ⚠️ Your Phone | ✅ Camera API | ✅ Windows Calendar |
-| Linux (Ubuntu 20.04+) | ✅ Thunderbird | ⚠️ ADB | ✅ V4L2 | ✅ Evolution |
+| Platform | Email | Camera | Calendar |
+|----------|-------|--------|----------|
+| macOS 10.15+ | ✅ Mail.app | ✅ Screen Capture | ✅ Calendar.app |
+| Windows 10+ | ✅ Outlook | ✅ Camera API | ✅ Windows Calendar |
+| Linux (Ubuntu 20.04+) | ✅ Thunderbird | ✅ V4L2 | ✅ Evolution |
 
 ✅ Full Support | ⚠️ Requires Setup
 
 ## 🚀 Next Steps
 
-1. **Grant Permissions**: Follow prompts for Mail, SMS, Camera, Calendar
-2. **Initial Scan**: Run full scan of emails and SMS
+1. **Grant Permissions**: Follow prompts for Mail, Camera, Calendar
+2. **Initial Scan**: Run full scan of emails
 3. **Configure Auto-Sync**: Enable background monitoring
 4. **Set Reminders**: Connect calendar for renewal alerts
 5. **Test Scanning**: Capture a receipt with camera scanner
