@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SaaS Optimizer</title>
+  <style>
+    body {
+      width: 350px;
+      padding: 15px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      font-size: 18px;
+      margin: 0 0 5px 0;
+      color: #333;
+    }
+    
+    .subtitle {
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .status {
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      font-size: 13px;
+    }
+    
+    .status.connected {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .status.disconnected {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .button-primary {
+      background: #007bff;
+      color: white;
+    }
+    
+    .button-primary:hover {
+      background: #0056b3;
+    }
+    
+    .button-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .button-secondary:hover {
+      background: #5a6268;
+    }
+    
+    .button-success {
+      background: #28a745;
+      color: white;
+    }
+    
+    .button-success:hover {
+      background: #218838;
+    }
+    
+    .input-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+    
+    .stats {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 15px;
+    }
+    
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 13px;
+    }
+    
+    .stat-label {
+      color: #666;
+    }
+    
+    .stat-value {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .message {
+      padding: 8px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 12px;
+    }
+    
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>💰 SaaS Optimizer</h1>
+    <div class="subtitle">Receipt Scanner</div>
+  </div>
+  
+  <div id="login-section">
+    <div class="input-group">
+      <label for="api-url">API URL</label>
+      <input type="text" id="api-url" placeholder="http://localhost:8000" value="http://localhost:8000">
+    </div>
+    
+    <div class="input-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="your@email.com">
+    </div>
+    
+    <div class="input-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Password">
+    </div>
+    
+    <button class="button button-primary" id="login-btn">Login</button>
+    
+    <div id="login-message"></div>
+  </div>
+  
+  <div id="main-section" class="hidden">
+    <div id="status" class="status">
+      <span id="status-text"></span>
+    </div>
+    
+    <button class="button button-success" id="scan-btn">
+      🔍 Scan Current Email
+    </button>
+    
+    <button class="button button-primary" id="auto-scan-btn">
+      ⚡ Auto-Scan Receipts
+    </button>
+    
+    <div class="stats">
+      <div class="stat-item">
+        <span class="stat-label">Receipts Scanned:</span>
+        <span class="stat-value" id="receipts-count">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">This Session:</span>
+        <span class="stat-value" id="session-count">0</span>
+      </div>
+    </div>
+    
+    <div id="scan-message"></div>
+    
+    <button class="button button-secondary" id="logout-btn">
+      Logout
+    </button>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -25,3 +25,4 @@ class User(Base):
     saas_score = relationship("SaaSScore", back_populates="user", uselist=False, cascade="all, delete-orphan")
     savings_reports = relationship("SavingsReport", back_populates="user", cascade="all, delete-orphan")
     referral_links = relationship("ReferralLink", back_populates="user", cascade="all, delete-orphan")
+    gmail_token = relationship("GmailToken", back_populates="user", uselist=False, cascade="all, delete-orphan")

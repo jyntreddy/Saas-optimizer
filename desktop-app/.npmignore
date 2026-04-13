@@ -1,0 +1,36 @@
+# SaaS Optimizer Desktop App
+
+🖥️ **Native device integration** for the SaaS Optimizer platform.
+
+## Features
+
+- 📧 **Email Scanner** - Reads Mail.app, Outlook, Thunderbird receipts
+- 📱 **SMS Reader** - Accesses Messages.app or Android SMS via ADB  
+- 📸 **Document OCR** - Scans receipts with camera/screen capture
+- 📅 **Calendar Sync** - Tracks renewal dates from system calendars
+- 🔔 **Notifications** - Desktop alerts for renewals
+
+## Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Run in development
+npm run dev
+
+# Build for your platform
+npm run build
+```
+
+## Permissions Required
+
+- **macOS**: Full Disk Access for Mail.app and Messages.app
+- **Windows**: Outlook access, Your Phone app for SMS
+- **Linux**: Access to Thunderbird, ADB for Android SMS
+
+See [README.md](./README.md) for full documentation.
+
+## License
+
+MIT

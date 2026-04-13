@@ -1,16 +1,18 @@
-"""SMS Webhook Endpoint"""
+"""SMS Transaction Endpoint - Desktop App Integration"""
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Form
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import Dict, Any
+from datetime import datetime
+import hashlib
 
 from app.db.base import get_db
 from app.models.user import User
 from app.models.subscription import Subscription
 from app.models.sms_transaction import SMSTransaction
 from app.schemas.sms import (
-    TwilioWebhook,
     SMSTransactionCreate,
+    SMSTransactionUpload,
     SMSTransaction as SMSTransactionSchema,
     ParsedSMS
 )
@@ -20,54 +22,49 @@ from app.api.dependencies import get_current_user
 router = APIRouter()
 
 
-@router.post("/webhook", status_code=200)
-async def receive_twilio_webhook(
+@router.post("/upload", response_model=SMSTransactionSchema)
+async def upload_sms(
+    sms_data: SMSTransactionUpload,
     background_tasks: BackgroundTasks,
-    MessageSid: str = Form(...),
-    From: str = Form(...),
-    To: str = Form(...),
-    Body: str = Form(...),
-    AccountSid: str = Form(None),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
-) -> Dict[str, str]:
+) -> SMSTransaction:
     """
-    Receive SMS webhook from Twilio
+    Upload SMS from desktop app
     
-    Twilio sends form-encoded data, not JSON
+    The desktop app scans local SMS databases and uploads transactions
     """
     
     # Parse the SMS
-    parsed = SMSParser.parse(Body)
+    parsed = SMSParser.parse(sms_data.message)
     
-    if not SMSParser.is_subscription_sms(Body):
-        return {"status": "ignored", "reason": "Not a subscription SMS"}
+    if not SMSParser.is_subscription_sms(sms_data.message):
+        raise HTTPException(status_code=400, detail="Not a subscription-related SMS")
     
-    # Find user by phone number (To number)
-    # In production, you'd have a phone number -> user mapping
-    user = db.query(User).filter(User.is_active == True).first()
-    
-    if not user:
-        return {"status": "error", "reason": "User not found"}
+    # Generate unique message ID from content hash
+    message_hash = hashlib.sha256(
+        f"{sms_data.sender}{sms_data.message}{sms_data.timestamp}".encode()
+    ).hexdigest()[:32]
     
     # Check if message already processed
     existing = db.query(SMSTransaction).filter(
-        SMSTransaction.message_sid == MessageSid
+        SMSTransaction.message_sid == message_hash
     ).first()
     
     if existing:
-        return {"status": "duplicate", "reason": "Message already processed"}
+        raise HTTPException(status_code=400, detail="SMS already processed")
     
     # Create SMS transaction
     sms_transaction = SMSTransaction(
-        user_id=user.id,
-        from_number=From,
-        to_number=To,
-        message_sid=MessageSid,
-        raw_message=Body,
+        user_id=current_user.id,
+        from_number=sms_data.sender,
+        to_number=sms_data.recipient or "desktop-app",
+        message_sid=message_hash,
+        raw_message=sms_data.message,
         vendor=parsed.vendor,
         amount=parsed.amount,
         currency=parsed.currency,
-        transaction_date=parsed.transaction_date,
+        transaction_date=sms_data.timestamp or parsed.transaction_date,
         confidence_score=parsed.confidence,
         status="pending"
     )
@@ -75,7 +72,7 @@ async def receive_twilio_webhook(
     # Try to match with existing subscription
     if parsed.vendor and parsed.amount:
         subscription = db.query(Subscription).filter(
-            Subscription.user_id == user.id,
+            Subscription.user_id == current_user.id,
             Subscription.service_name.ilike(f"%{parsed.vendor}%")
         ).first()
         
@@ -88,13 +85,7 @@ async def receive_twilio_webhook(
     db.commit()
     db.refresh(sms_transaction)
     
-    return {
-        "status": "success",
-        "message": "SMS processed",
-        "transaction_id": str(sms_transaction.id),
-        "parsed_vendor": parsed.vendor or "unknown",
-        "parsed_amount": str(parsed.amount) if parsed.amount else "unknown"
-    }
+    return sms_transaction
 
 
 @router.post("/parse", response_model=ParsedSMS)

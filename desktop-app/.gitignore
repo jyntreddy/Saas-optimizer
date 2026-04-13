@@ -1,0 +1,28 @@
+.DS_Store
+node_modules/
+dist/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+*.dmg
+*.zip
+*.exe
+*.AppImage
+*.deb
+*.rpm
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Electron builder
+out/

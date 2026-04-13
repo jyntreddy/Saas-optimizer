@@ -1,18 +1,17 @@
-"""SMS Transaction Schemas"""
+"""SMS Transaction Schemas - Desktop App Integration"""
 
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
 
-class TwilioWebhook(BaseModel):
-    """Schema for incoming Twilio webhook"""
-    MessageSid: str
-    From: str
-    To: str
-    Body: str
-    AccountSid: Optional[str] = None
-    NumMedia: Optional[str] = "0"
+class SMSTransactionUpload(BaseModel):
+    """Schema for uploading SMS from desktop app"""
+    sender: str = Field(..., description="Phone number or sender ID")
+    recipient: Optional[str] = Field(None, description="Recipient phone number")
+    message: str = Field(..., description="SMS message body")
+    timestamp: Optional[datetime] = Field(None, description="SMS timestamp")
+    source: str = Field("desktop-app", description="Source of the SMS (desktop-app, android-adb, ios-messages)")
 
 
 class SMSTransactionBase(BaseModel):

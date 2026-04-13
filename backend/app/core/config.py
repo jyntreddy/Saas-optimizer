@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str | None = None
     GCP_PROJECT_ID: str | None = None
     
+    # Gmail OAuth
+    GMAIL_CLIENT_ID: str | None = None
+    GMAIL_CLIENT_SECRET: str | None = None
+    GMAIL_REDIRECT_URI: str = "http://localhost:8501/gmail-callback"
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

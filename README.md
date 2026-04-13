@@ -4,12 +4,22 @@ A comprehensive platform for managing and optimizing SaaS subscriptions with AI-
 
 ## 🚀 Features
 
+### Core Features
 - **Subscription Management**: Track all your SaaS subscriptions in one place
 - **Cost Analytics**: Visualize spending patterns and trends
 - **AI Recommendations**: Get intelligent suggestions for cost optimization
 - **Automated Alerts**: Receive notifications for upcoming renewals
 - **Duplicate Detection**: Identify overlapping services
 - **Usage Analytics**: Monitor subscription utilization
+
+### 📧 Email & SMS Automation
+Multiple ways to automatically capture subscription receipts:
+- **Desktop App**: Native device integration with full email/SMS access (macOS, Windows, Linux)
+- **Gmail OAuth Integration**: Bulk scan your Gmail for historical receipts  
+- **Email Forwarding**: Forward receipts to dedicated email for auto-processing
+- **Browser Extension**: One-click scanning directly from Gmail inbox
+
+[→ Desktop App Guide](desktop-app/README.md) | [→ Email Automation](EMAIL_AUTOMATION_GUIDE.md)
 
 ## 🏗️ Architecture
 
@@ -74,6 +84,14 @@ saas-optimizer/
 │   │   └── config.toml
 │   ├── requirements.txt
 │   └── .env.example
+│
+├── desktop-app/               # Electron desktop app (NEW!)
+│   ├── src/
+│   │   ├── main.js           # Electron main process
+│   │   ├── preload.js        # IPC bridge
+│   │   └── services/         # Email, SMS, Camera, Calendar
+│   ├── package.json
+│   └── README.md             # Desktop app documentation
 │
 └── infra/                     # Infrastructure as Code
     ├── docker/               # Docker files

@@ -11,6 +11,7 @@ class EmailReceipt(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    gmail_message_id = Column(String(255), nullable=True, unique=True, index=True)  # Gmail API message ID
     email_subject = Column(String(500), nullable=False)
     sender_email = Column(String(255), nullable=False)
     received_date = Column(DateTime(timezone=True), nullable=False)
