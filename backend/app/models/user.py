@@ -18,7 +18,6 @@ class User(Base):
     
     # Relationships
     subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")
-    sms_transactions = relationship("SMSTransaction", back_populates="user", cascade="all, delete-orphan")
     email_receipts = relationship("EmailReceipt", back_populates="user", cascade="all, delete-orphan")
     team_members = relationship("TeamMember", back_populates="organization", cascade="all, delete-orphan")
     negotiation_sessions = relationship("NegotiationSession", back_populates="user", cascade="all, delete-orphan")

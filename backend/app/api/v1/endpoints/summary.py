@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from app.db.base import get_db
 from app.models.user import User
 from app.models.subscription import Subscription
-from app.models.sms_transaction import SMSTransaction
 from app.api.dependencies import get_current_user
 
 router = APIRouter()
@@ -74,12 +73,6 @@ async def get_subscription_summary(
         )
         spending_by_provider[provider] += monthly_cost
     
-    # Get recent SMS transactions
-    recent_transactions = db.query(SMSTransaction).filter(
-        SMSTransaction.user_id == current_user.id,
-        SMSTransaction.created_at >= datetime.utcnow() - timedelta(days=30)
-    ).count()
-    
     # Calculate trends (last 3 months mock data)
     trends = _calculate_spending_trends(subscriptions)
     
@@ -92,7 +85,6 @@ async def get_subscription_summary(
         "spending_by_provider": spending_by_provider,
         "duplicates": duplicates,
         "low_usage_subscriptions": low_usage,
-        "recent_sms_transactions": recent_transactions,
         "spending_trends": trends,
         "recommendations_count": len(duplicates) + len(low_usage),
         "potential_savings": sum(d["potential_savings"] for d in duplicates) + sum(l["monthly_cost"] for l in low_usage)

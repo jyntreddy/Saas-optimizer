@@ -7,7 +7,7 @@ from alembic import context
 
 # Import your models' Base and all models
 from app.db.base import Base
-from app.models import User, Subscription, SMSTransaction, SubscriptionAlternative
+from app.models import User, Subscription, SubscriptionAlternative
 
 # this is the Alembic Config object
 config = context.config

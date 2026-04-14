@@ -1,6 +1,5 @@
 from .user import User
 from .subscription import Subscription, SubscriptionStatus
-from .sms_transaction import SMSTransaction
 from .subscription_alternative import SubscriptionAlternative
 from .email_receipt import EmailReceipt
 from .team import TeamMember, UsageLog, ShadowITDetection
@@ -11,7 +10,6 @@ __all__ = [
     "User", 
     "Subscription", 
     "SubscriptionStatus",
-    "SMSTransaction",
     "SubscriptionAlternative",
     "EmailReceipt",
     "TeamMember",

@@ -29,7 +29,6 @@ class Subscription(Base):
     
     # Relationships
     user = relationship("User", back_populates="subscriptions")
-    sms_transactions = relationship("SMSTransaction", back_populates="subscription", cascade="all, delete-orphan")
     alternatives = relationship("SubscriptionAlternative", back_populates="subscription", cascade="all, delete-orphan")
     email_receipts = relationship("EmailReceipt", back_populates="subscription", cascade="all, delete-orphan")
     usage_logs = relationship("UsageLog", back_populates="subscription", cascade="all, delete-orphan")
