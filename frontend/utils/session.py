@@ -50,3 +50,11 @@ def trigger_refresh():
 def clear_refresh():
     """Clear refresh flag"""
     st.session_state.refresh_data = False
+
+
+def require_auth():
+    """Require authentication - stops execution if not logged in"""
+    init_session_state()
+    if not is_logged_in():
+        st.warning("👈 Please login from the sidebar to access this page")
+        st.stop()
