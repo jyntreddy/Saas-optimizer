@@ -271,3 +271,52 @@ def make_request(method: str, endpoint: str, **kwargs) -> Optional[Any]:
     except Exception as e:
         st.error(f"API error: {e}")
         return None
+
+
+# Email receipt functions for Chrome extension integration
+def get_email_receipts(token: str, status: str = None) -> List[Dict[str, Any]]:
+    """Get email receipts scanned by Chrome extension"""
+    try:
+        url = f"{BASE_URL}/emails/receipts"
+        if status:
+            url += f"?status={status}"
+        
+        response = requests.get(
+            url,
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        if response.status_code == 200:
+            return response.json()
+        return []
+    except Exception as e:
+        print(f"Get email receipts error: {e}")
+        return []
+
+
+def get_receipt_stats(token: str) -> Optional[Dict[str, Any]]:
+    """Get email receipt statistics"""
+    try:
+        response = requests.get(
+            f"{BASE_URL}/emails/stats",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        if response.status_code == 200:
+            return response.json()
+        return None
+    except Exception as e:
+        print(f"Get receipt stats error: {e}")
+        return None
+
+
+def update_receipt_status(token: str, receipt_id: int, status: str) -> bool:
+    """Update email receipt status"""
+    try:
+        response = requests.patch(
+            f"{BASE_URL}/emails/receipts/{receipt_id}/status",
+            params={"status": status},
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        return response.status_code == 200
+    except Exception as e:
+        print(f"Update receipt status error: {e}")
+        return False

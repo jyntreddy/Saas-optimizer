@@ -1,44 +1,196 @@
-// Popup script for SaaS Optimizer extension
+/**
+ * Popup UI Controller for SaaS Optimizer Gmail Scanner
+ */
 
-let apiUrl = 'http://localhost:8000';
-let accessToken = null;
-let sessionCount = 0;
+let backendToken = null;
+let backendUrl = 'http://localhost:8000';
+let isScanning = false;
 
-// Load saved settings
-chrome.storage.local.get(['apiUrl', 'accessToken', 'receiptsCount'], (result) => {
-  if (result.apiUrl) {
-    apiUrl = result.apiUrl;
-    document.getElementById('api-url').value = apiUrl;
-  }
-  
-  if (result.accessToken) {
-    accessToken = result.accessToken;
-    showMainSection();
-  }
-  
-  if (result.receiptsCount) {
-    document.getElementById('receipts-count').textContent = result.receiptsCount;
-  }
+// Initialize on load
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadSettings();
+  await checkGmailAuth();
+  await checkBackendAuth();
+  setupEventListeners();
+  updateUI();
 });
 
-// Login
-document.getElementById('login-btn').addEventListener('click', async () => {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  apiUrl = document.getElementById('api-url').value;
+/**
+ * Load saved settings from storage
+ */
+async function loadSettings() {
+  const storage = await chrome.storage.local.get([
+    'backendToken',
+    'backendUrl',
+    'backendEmail',
+    'receiptsCount',
+    'lastScanTime',
+    'autoScanEnabled'
+  ]);
+  
+  if (storage.backendToken) {
+    backendToken = storage.backendToken;
+  }
+  
+  if (storage.backendUrl) {
+    backendUrl = storage.backendUrl;
+    document.getElementById('backend-url').value = backendUrl;
+  }
+  
+  if (storage.backendEmail) {
+    document.getElementById('backend-email').value = storage.backendEmail;
+  }
+  
+  if (storage.receiptsCount) {
+    document.getElementById('receipts-count').textContent = storage.receiptsCount;
+  }
+  
+  if (storage.lastScanTime) {
+    const lastScan = new Date(storage.lastScanTime);
+    document.getElementById('last-scan').textContent = formatTimeAgo(lastScan);
+  }
+  
+  if (storage.autoScanEnabled) {
+    document.getElementById('auto-scan-checkbox').checked = true;
+  }
+}
+
+/**
+ * Check Gmail authentication status
+ */
+async function checkGmailAuth() {
+  try {
+    const response = await chrome.runtime.sendMessage({ type: 'GET_AUTH_STATUS' });
+    
+    if (response.authenticated) {
+      showGmailConnected(response.email);
+    } else {
+      showGmailDisconnected();
+    }
+  } catch (error) {
+    console.error('Error checking Gmail auth:', error);
+    showGmailDisconnected();
+  }
+}
+
+/**
+ * Check backend authentication status
+ */
+async function checkBackendAuth() {
+  if (backendToken) {
+    showBackendConnected();
+  } else {
+    showBackendDisconnected();
+  }
+}
+
+/**
+ * Setup event listeners
+ */
+function setupEventListeners() {
+  // Gmail auth button
+  document.getElementById('gmail-auth-btn').addEventListener('click', async () => {
+    try {
+      showMessage('Connecting to Gmail...', 'loading');
+      const result = await chrome.runtime.sendMessage({ type: 'SCAN_GMAIL' });
+      
+      if (result.success) {
+        await checkGmailAuth();
+        showMessage('Gmail connected successfully!', 'success');
+      } else {
+        showMessage('Failed to connect: ' + result.error, 'error');
+      }
+    } catch (error) {
+      showMessage('Error: ' + error.message, 'error');
+    }
+  });
+  
+  // Gmail logout button
+  document.getElementById('gmail-logout-btn').addEventListener('click', async () => {
+    try {
+      await chrome.runtime.sendMessage({ type: 'LOGOUT' });
+      showGmailDisconnected();
+      showMessage('Disconnected from Gmail', 'success');
+    } catch (error) {
+      showMessage('Error: ' + error.message, 'error');
+    }
+  });
+  
+  // Scan button
+  document.getElementById('scan-btn').addEventListener('click', startScan);
+  
+  // Backend login button
+  document.getElementById('backend-login-btn').addEventListener('click', loginToBackend);
+  
+  // Backend logout button
+  document.getElementById('backend-logout-btn').addEventListener('click', logoutFromBackend);
+  
+  // Auto-scan checkbox
+  document.getElementById('auto-scan-checkbox').addEventListener('change', (e) => {
+    chrome.storage.local.set({ autoScanEnabled: e.target.checked });
+  });
+}
+
+/**
+ * Start Gmail scan
+ */
+async function startScan() {
+  if (isScanning) return;
+  
+  isScanning = true;
+  document.getElementById('scan-btn').disabled = true;
+  document.getElementById('progress-section').classList.remove('hidden');
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('progress-text').textContent = 'Starting scan...';
+  
+  try {
+    const result = await chrome.runtime.sendMessage({ type: 'SCAN_GMAIL' });
+    
+    if (result.success) {
+      document.getElementById('receipts-count').textContent = result.receipts;
+      document.getElementById('last-scan').textContent = 'Just now';
+      
+      await chrome.storage.local.set({
+        receiptsCount: result.receipts,
+        lastScanTime: new Date().toISOString()
+      });
+      
+      if (result.pending) {
+        showMessage(`Found ${result.receipts} receipts! Login to backend to sync.`, 'success');
+      } else {
+        showMessage(`Successfully scanned ${result.receipts} receipts!`, 'success');
+      }
+    } else {
+      showMessage('Scan failed: ' + result.error, 'error');
+    }
+  } catch (error) {
+    showMessage('Error: ' + error.message, 'error');
+  } finally {
+    isScanning = false;
+    document.getElementById('scan-btn').disabled = false;
+    document.getElementById('progress-section').classList.add('hidden');
+  }
+}
+
+/**
+ * Login to backend
+ */
+async function loginToBackend() {
+  const email = document.getElementById('backend-email').value;
+  const password = document.getElementById('backend-password').value;
+  backendUrl = document.getElementById('backend-url').value;
   
   if (!email || !password) {
-    showMessage('login-message', 'Please enter email and password', 'error');
+    showBackendMessage('Please enter email and password', 'error');
     return;
   }
   
   try {
-    // Login to API
     const formData = new URLSearchParams();
     formData.append('username', email);
     formData.append('password', password);
     
-    const response = await fetch(`${apiUrl}/api/v1/auth/login`, {
+    const response = await fetch(`${backendUrl}/api/v1/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -51,53 +203,145 @@ document.getElementById('login-btn').addEventListener('click', async () => {
     }
     
     const data = await response.json();
-    accessToken = data.access_token;
+    backendToken = data.access_token;
     
-    // Save credentials
-    chrome.storage.local.set({ 
-      apiUrl: apiUrl,
-      accessToken: accessToken,
-      userEmail: email
+    // Save to storage
+    await chrome.storage.local.set({
+      backendToken,
+      backendUrl,
+      backendEmail: email
     });
     
-    showMessage('login-message', 'Login successful!', 'success');
-    setTimeout(() => {
-      showMainSection();
-    }, 1000);
+    // Send token to background script
+    await chrome.runtime.sendMessage({
+      type: 'SET_BACKEND_TOKEN',
+      token: backendToken
+    });
+    
+    showBackendConnected();
+    showMessage('Backend connected successfully!', 'success');
+    
+    // Check for pending receipts
+    const storage = await chrome.storage.local.get(['pendingReceipts']);
+    if (storage.pendingReceipts && storage.pendingReceipts.length > 0) {
+      showMessage(`Syncing ${storage.pendingReceipts.length} pending receipts...`, 'loading');
+      // Trigger a scan to upload pending receipts
+      setTimeout(() => startScan(), 1000);
+    }
     
   } catch (error) {
-    showMessage('login-message', 'Login failed: ' + error.message, 'error');
+    showBackendMessage('Login failed: ' + error.message, 'error');
+  }
+}
+
+/**
+ * Logout from backend
+ */
+async function logoutFromBackend() {
+  await chrome.storage.local.remove(['backendToken', 'backendEmail']);
+  backendToken = null;
+  
+  await chrome.runtime.sendMessage({
+    type: 'SET_BACKEND_TOKEN',
+    token: null
+  });
+  
+  showBackendDisconnected();
+  showMessage('Disconnected from backend', 'success');
+}
+
+/**
+ * Show Gmail connected state
+ */
+function showGmailConnected(email) {
+  document.getElementById('gmail-disconnected').classList.add('hidden');
+  document.getElementById('gmail-connected').classList.remove('hidden');
+  document.getElementById('gmail-email').textContent = email || 'Connected';
+  document.getElementById('scan-section').classList.remove('hidden');
+}
+
+/**
+ * Show Gmail disconnected state
+ */
+function showGmailDisconnected() {
+  document.getElementById('gmail-disconnected').classList.remove('hidden');
+  document.getElementById('gmail-connected').classList.add('hidden');
+  document.getElementById('scan-section').classList.add('hidden');
+}
+
+/**
+ * Show backend connected state
+ */
+function showBackendConnected() {
+  document.getElementById('backend-login').classList.add('hidden');
+  document.getElementById('backend-connected').classList.remove('hidden');
+}
+
+/**
+ * Show backend disconnected state
+ */
+function showBackendDisconnected() {
+  document.getElementById('backend-login').classList.remove('hidden');
+  document.getElementById('backend-connected').classList.add('hidden');
+}
+
+/**
+ * Show message to user
+ */
+function showMessage(text, type) {
+  const container = document.getElementById('message-container');
+  container.innerHTML = `<div class="message ${type}">${text}</div>`;
+  
+  if (type !== 'loading') {
+    setTimeout(() => {
+      container.innerHTML = '';
+    }, 5000);
+  }
+}
+
+/**
+ * Show backend-specific message
+ */
+function showBackendMessage(text, type) {
+  const container = document.getElementById('backend-message');
+  container.innerHTML = `<div class="message ${type}">${text}</div>`;
+  
+  setTimeout(() => {
+    container.innerHTML = '';
+  }, 5000);
+}
+
+/**
+ * Update UI
+ */
+function updateUI() {
+  // Any periodic updates can go here
+}
+
+/**
+ * Format time ago
+ */
+function formatTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  
+  if (seconds < 60) return 'Just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  return `${Math.floor(seconds / 86400)}d ago`;
+}
+
+/**
+ * Listen for scan progress updates
+ */
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'SCAN_PROGRESS') {
+    document.getElementById('progress-fill').style.width = request.progress + '%';
+    document.getElementById('progress-text').textContent = 
+      `Scanned ${request.receipts} receipts (${request.progress}%)`;
   }
 });
 
-// Logout
-document.getElementById('logout-btn').addEventListener('click', () => {
-  chrome.storage.local.remove(['accessToken', 'userEmail']);
-  accessToken = null;
-  showLoginSection();
-});
-
-// Scan current email
-document.getElementById('scan-btn').addEventListener('click', async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  
-  if (!tab.url.includes('mail.google.com')) {
-    showMessage('scan-message', 'Please open a Gmail email first', 'error');
-    return;
-  }
-  
-  // Send message to content script
-  chrome.tabs.sendMessage(tab.id, { action: 'scanCurrentEmail' }, (response) => {
-    if (chrome.runtime.lastError) {
-      showMessage('scan-message', 'Error: ' + chrome.runtime.lastError.message, 'error');
-      return;
-    }
-    
-    if (response && response.success) {
-      sendEmailToAPI(response.data);
-    } else {
-      showMessage('scan-message', 'Could not extract email data', 'error');
-    }
+console.log('Popup script loaded');
   });
 });
 

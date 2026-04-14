@@ -2,36 +2,53 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>SaaS Optimizer</title>
+  <title>SaaS Optimizer - Gmail Scanner</title>
   <style>
     body {
-      width: 350px;
-      padding: 15px;
+      width: 400px;
+      padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
       margin: 0;
+      background: #f8f9fa;
     }
     
     .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
       text-align: center;
-      margin-bottom: 20px;
     }
     
     h1 {
-      font-size: 18px;
+      font-size: 20px;
       margin: 0 0 5px 0;
-      color: #333;
     }
     
     .subtitle {
-      font-size: 12px;
-      color: #666;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    
+    .content {
+      padding: 20px;
+    }
+    
+    .auth-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .status {
-      padding: 10px;
-      border-radius: 5px;
+      padding: 12px;
+      border-radius: 6px;
       margin-bottom: 15px;
-      font-size: 13px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     
     .status.connected {
@@ -41,29 +58,49 @@
     }
     
     .status.disconnected {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+    
+    .status-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+    
+    .status-icon.connected {
+      background: #28a745;
+    }
+    
+    .status-icon.disconnected {
+      background: #ffc107;
     }
     
     .button {
       width: 100%;
-      padding: 10px;
-      margin: 5px 0;
+      padding: 12px;
+      margin: 8px 0;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 14px;
       cursor: pointer;
       font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     
     .button-primary {
-      background: #007bff;
+      background: #667eea;
       color: white;
     }
     
-    .button-primary:hover {
-      background: #0056b3;
+    .button-primary:hover:not(:disabled) {
+      background: #5568d3;
     }
     
     .button-secondary {
@@ -71,7 +108,7 @@
       color: white;
     }
     
-    .button-secondary:hover {
+    .button-secondary:hover:not(:disabled) {
       background: #5a6268;
     }
     
@@ -80,8 +117,66 @@
       color: white;
     }
     
-    .button-success:hover {
+    .button-success:hover:not(:disabled) {
       background: #218838;
+    }
+    
+    .button-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .button-danger:hover:not(:disabled) {
+      background: #c82333;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 15px;
+      border-radius: 6px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e9ecef;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transition: width 0.3s;
+    }
+    
+    .progress-text {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      margin-top: 5px;
     }
     
     .input-group {
@@ -90,10 +185,10 @@
     
     label {
       display: block;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
-      margin-bottom: 5px;
-      color: #555;
+      margin-bottom: 6px;
+      color: #333;
     }
     
     input {
@@ -105,107 +200,171 @@
       box-sizing: border-box;
     }
     
-    .stats {
-      background: #f8f9fa;
-      padding: 10px;
-      border-radius: 5px;
-      margin-top: 15px;
-    }
-    
-    .stat-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 5px 0;
-      font-size: 13px;
-    }
-    
-    .stat-label {
-      color: #666;
-    }
-    
-    .stat-value {
-      font-weight: 600;
-      color: #333;
-    }
-    
-    .hidden {
-      display: none;
+    input:focus {
+      outline: none;
+      border-color: #667eea;
     }
     
     .message {
-      padding: 8px;
-      border-radius: 4px;
+      padding: 10px;
+      border-radius: 6px;
       margin: 10px 0;
-      font-size: 12px;
+      font-size: 13px;
     }
     
     .message.success {
       background: #d4edda;
       color: #155724;
+      border: 1px solid #c3e6cb;
     }
     
     .message.error {
       background: #f8d7da;
       color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin: 20px 0 10px 0;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+    }
+    
+    .checkbox-group label {
+      margin: 0;
+      font-weight: normal;
+    }
+    
+    .email-display {
+      font-size: 13px;
+      color: #667eea;
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>💰 SaaS Optimizer</h1>
-    <div class="subtitle">Receipt Scanner</div>
+    <div class="subtitle">Gmail Receipt Scanner</div>
   </div>
   
-  <div id="login-section">
-    <div class="input-group">
-      <label for="api-url">API URL</label>
-      <input type="text" id="api-url" placeholder="http://localhost:8000" value="http://localhost:8000">
-    </div>
-    
-    <div class="input-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" placeholder="your@email.com">
-    </div>
-    
-    <div class="input-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Password">
-    </div>
-    
-    <button class="button button-primary" id="login-btn">Login</button>
-    
-    <div id="login-message"></div>
-  </div>
-  
-  <div id="main-section" class="hidden">
-    <div id="status" class="status">
-      <span id="status-text"></span>
-    </div>
-    
-    <button class="button button-success" id="scan-btn">
-      🔍 Scan Current Email
-    </button>
-    
-    <button class="button button-primary" id="auto-scan-btn">
-      ⚡ Auto-Scan Receipts
-    </button>
-    
-    <div class="stats">
-      <div class="stat-item">
-        <span class="stat-label">Receipts Scanned:</span>
-        <span class="stat-value" id="receipts-count">0</span>
+  <div class="content">
+    <!-- Gmail Auth Section -->
+    <div class="auth-section">
+      <h3 style="margin: 0 0 15px 0; font-size: 16px;">Gmail Access</h3>
+      
+      <div id="gmail-disconnected" class="hidden">
+        <div class="status disconnected">
+          <div class="status-icon disconnected"></div>
+          <div>Not connected to Gmail</div>
+        </div>
+        <button class="button button-primary" id="gmail-auth-btn">
+          📧 Connect Gmail Account
+        </button>
       </div>
-      <div class="stat-item">
-        <span class="stat-label">This Session:</span>
-        <span class="stat-value" id="session-count">0</span>
+      
+      <div id="gmail-connected" class="hidden">
+        <div class="status connected">
+          <div class="status-icon connected"></div>
+          <div>
+            <div>Connected as</div>
+            <div class="email-display" id="gmail-email"></div>
+          </div>
+        </div>
+        <button class="button button-danger" id="gmail-logout-btn">
+          Disconnect Gmail
+        </button>
       </div>
     </div>
     
-    <div id="scan-message"></div>
+    <!-- Scan Section -->
+    <div class="auth-section" id="scan-section" class="hidden">
+      <h3 style="margin: 0 0 15px 0; font-size: 16px;">Scan Receipts</h3>
+      
+      <button class="button button-success" id="scan-btn">
+        🔍 Scan Gmail for Receipts
+      </button>
+      
+      <div id="progress-section" class="hidden">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text" id="progress-text">Scanning...</div>
+      </div>
+      
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="receipts-count">0</div>
+          <div class="stat-label">Receipts Found</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="last-scan">Never</div>
+          <div class="stat-label">Last Scan</div>
+        </div>
+      </div>
+    </div>
     
-    <button class="button button-secondary" id="logout-btn">
-      Logout
-    </button>
+    <!-- Backend Section -->
+    <div class="auth-section">
+      <h3 style="margin: 0 0 15px 0; font-size: 16px;">Backend Settings</h3>
+      
+      <div id="backend-login" class="hidden">
+        <div class="input-group">
+          <label for="backend-url">Backend URL</label>
+          <input type="text" id="backend-url" value="http://localhost:8000">
+        </div>
+        
+        <div class="input-group">
+          <label for="backend-email">Email</label>
+          <input type="email" id="backend-email" placeholder="your@email.com">
+        </div>
+        
+        <div class="input-group">
+          <label for="backend-password">Password</label>
+          <input type="password" id="backend-password" placeholder="Password">
+        </div>
+        
+        <button class="button button-primary" id="backend-login-btn">
+          Login to Backend
+        </button>
+        
+        <div id="backend-message"></div>
+      </div>
+      
+      <div id="backend-connected" class="hidden">
+        <div class="status connected">
+          <div class="status-icon connected"></div>
+          <div>Backend connected</div>
+        </div>
+        
+        <div class="checkbox-group">
+          <input type="checkbox" id="auto-scan-checkbox">
+          <label for="auto-scan-checkbox">Enable auto-scan (hourly)</label>
+        </div>
+        
+        <button class="button button-secondary" id="backend-logout-btn">
+          Disconnect Backend
+        </button>
+      </div>
+    </div>
+    
+    <div id="message-container"></div>
   </div>
   
   <script src="popup.js"></script>

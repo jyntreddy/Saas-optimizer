@@ -29,12 +29,13 @@ if not is_logged_in():
 token = get_token()
 
 with st.spinner("Loading dashboard data..."):
-    from utils.api import get_subscription_summary
+    from utils.api import get_subscription_summary, get_receipt_stats
     
     # Get enhanced summary
     enhanced_summary = get_subscription_summary(token)
     summary = get_spending_summary(token)
     subscriptions = get_subscriptions(token)
+    receipt_stats = get_receipt_stats(token)
 
 if not summary:
     st.error("Failed to load spending summary")
@@ -71,6 +72,45 @@ with col4:
     )
 
 st.divider()
+
+# Chrome Extension Stats
+if receipt_stats and receipt_stats.get('from_extension', 0) > 0:
+    st.markdown("### 📧 Chrome Extension Activity")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric(
+            "Scanned Receipts",
+            receipt_stats.get('from_extension', 0),
+            help="Emails scanned by Chrome extension"
+        )
+    
+    with col2:
+        st.metric(
+            "Pending Review",
+            receipt_stats.get('pending', 0),
+            help="Receipts waiting to be matched"
+        )
+    
+    with col3:
+        st.metric(
+            "Matched",
+            receipt_stats.get('matched', 0),
+            help="Receipts linked to subscriptions"
+        )
+    
+    with col4:
+        st.metric(
+            "Detected Spending",
+            format_currency(receipt_stats.get('total_detected_spending', 0)),
+            help="Total spending found in receipts"
+        )
+    
+    if receipt_stats.get('pending', 0) > 0:
+        st.info(f"💡 You have {receipt_stats.get('pending')} receipts pending review. [View Email Receipts](/Email_Receipts)")
+    
+    st.divider()
 
 # Alerts Section
 if enhanced_summary:

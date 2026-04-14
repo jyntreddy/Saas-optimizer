@@ -25,14 +25,14 @@ A comprehensive platform for managing and optimizing SaaS subscriptions with AI-
 - **🎯 Cost Per Usage**: Calculate hourly cost for each service
 - **🔄 Automated Sync**: Hourly background sync of usage data to dashboard
 
-### 📧 Email Automation
+### 📧 Email & Receipt Capture
 Multiple ways to automatically capture subscription receipts:
+- **Chrome Extension**: Gmail API integration for direct receipt scanning ⭐ **[Fully Integrated!](INTEGRATION_COMPLETE.md)**
 - **Desktop App**: Native device integration with full email access (macOS, Windows, Linux)
-- **Gmail OAuth Integration**: Bulk scan your Gmail for historical receipts  
+- **Gmail OAuth**: Backend OAuth flow for bulk historical receipt scanning
 - **Email Forwarding**: Forward receipts to dedicated email for auto-processing
-- **Browser Extension**: One-click scanning directly from Gmail inbox
 
-[→ Desktop App Guide](desktop-app/README.md) | [→ Email Automation](EMAIL_AUTOMATION_GUIDE.md)
+**Quick Start**: [5-Minute Setup Guide](QUICK_START_EXTENSION.md) | [Full Connection Guide](EXTENSION_DASHBOARD_CONNECTION.md)
 
 ## 🏗️ Architecture
 

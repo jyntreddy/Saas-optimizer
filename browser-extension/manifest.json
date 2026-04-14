@@ -1,15 +1,25 @@
 {
   "manifest_version": 3,
-  "name": "SaaS Optimizer - Receipt Scanner",
-  "version": "1.0.0",
-  "description": "Automatically detect and capture subscription receipts from Gmail",
+  "name": "SaaS Optimizer - Gmail Scanner",
+  "version": "2.0.0",
+  "description": "Automatically scan Gmail for subscription receipts using Gmail API",
   "permissions": [
-    "activeTab",
-    "storage"
+    "identity",
+    "storage",
+    "notifications"
   ],
   "host_permissions": [
-    "https://mail.google.com/*"
+    "https://www.googleapis.com/*",
+    "https://gmail.googleapis.com/*"
   ],
+  "oauth2": {
+    "client_id": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/gmail.readonly",
+      "https://www.googleapis.com/auth/userinfo.email"
+    ]
+  },
+  "_comment_oauth2": "IMPORTANT: Replace YOUR_GOOGLE_CLIENT_ID with your actual Google Cloud OAuth 2.0 Client ID. See CHROME_EXTENSION_SETUP.md for instructions on getting your Client ID from Google Cloud Console.",
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -18,14 +28,6 @@
       "128": "icons/icon128.svg"
     }
   },
-  "content_scripts": [
-    {
-      "matches": ["https://mail.google.com/*"],
-      "js": ["content.js"],
-      "css": ["content.css"],
-      "run_at": "document_idle"
-    }
-  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -33,5 +35,8 @@
     "16": "icons/icon16.svg",
     "48": "icons/icon48.svg",
     "128": "icons/icon128.svg"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
   }
 }
