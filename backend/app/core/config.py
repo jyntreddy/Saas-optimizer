@@ -46,6 +46,19 @@ class Settings(BaseSettings):
     GMAIL_CLIENT_SECRET: str | None = None
     GMAIL_REDIRECT_URI: str = "http://localhost:8501/gmail-callback"
     
+    # Sentry Configuration
+    SENTRY_DSN: str | None = None
+    SENTRY_ENVIRONMENT: str = "production"
+    SENTRY_TRACES_SAMPLE_RATE: float = 0.1
+    SENTRY_PROFILES_SAMPLE_RATE: float = 0.1
+    
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_PER_MINUTE: int = 100
+    RATE_LIMIT_PER_HOUR: int = 1000
+    RATE_LIMIT_PER_DAY: int = 10000
+    RATE_LIMIT_STORAGE_URL: str = "redis://localhost:6379/3"
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

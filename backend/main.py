@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
 from app.core.config import settings
 from app.api.v1.api import api_router
@@ -9,6 +12,23 @@ from app.middleware.error_handler import (
     validation_exception_handler,
     sqlalchemy_exception_handler
 )
+from app.middleware.rate_limit import RedisRateLimitMiddleware
+
+# Initialize Sentry
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.SENTRY_ENVIRONMENT,
+        traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
+        profiles_sample_rate=settings.SENTRY_PROFILES_SAMPLE_RATE,
+        integrations=[
+            FastApiIntegration(transaction_style="endpoint"),
+            SqlalchemyIntegration(),
+        ],
+        send_default_pii=False,  # Don't send personally identifiable information
+        attach_stacktrace=True,
+        before_send=lambda event, hint: event if settings.ENVIRONMENT != "development" else None,
+    )
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -26,6 +46,16 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Add Redis-based rate limiting
+app.add_middleware(
+    RedisRateLimitMiddleware,
+    redis_url=settings.RATE_LIMIT_STORAGE_URL,
+    enabled=settings.RATE_LIMIT_ENABLED,
+    requests_per_minute=settings.RATE_LIMIT_PER_MINUTE,
+    requests_per_hour=settings.RATE_LIMIT_PER_HOUR,
+    requests_per_day=settings.RATE_LIMIT_PER_DAY,
+)
 
 # Add exception handlers
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
